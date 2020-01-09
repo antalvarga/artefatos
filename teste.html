@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
+
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>Importar tabela de preços</title>
 
+    
     <!-- Incluindo o CSS do Bootstrap -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
 
@@ -23,9 +25,7 @@
     <!-- Carregar meus scripts -->
     <script type="text/javascript" src="myScript.js">
     </script>
-
-
-
+    
 </head>
 <body>
     <form class="well">
@@ -33,9 +33,33 @@
         <div class="topo" style="font-family:Georgia,Times New Roman,Times,serif">
             <br />
             <h3>Carregar tabela de preços</h3>
-            <br />
+            <!--<br /> v-->
+
+            <div id="MsgProcessamento" class="alert alert-info" role="alert" hidden=true>
+                <strong>Atenção!</strong>
+                Processamento do arquivo em andamento. Favor aguardar a mensagem de sucesso ou a indicação das inconsistências.
+            </div>
+
             
             <table class="topo">       
+
+                <tr>
+                    <td>
+                        Operação:
+                    </td>
+                    <td>				
+                        <input type="radio" value="I" onclick="carregaOpt('I')" name="Optoperacao"> Inclusão\Alteração 
+                        </input>
+                        <input type="radio" value="C" onclick="carregaOpt('C')" name="Optoperacao"> Exclusão 
+                        </input>
+                        <input type="hidden" id="HdnOperacao" name="HdnOperacao" value=""/>	
+                        <input type="hidden" id="HdnNomeDoArquivo" name="HdnNomeDoArquivo" value="<%=NomeDoArquivo%>"/>	                                  
+                        <input type="hidden" id="HdnNumSeqPreco" name="HdnNumSeqPreco" value="<%=NUM_SEQ_TAB_PRE_ARQUIVO_PRECO%>"/>	                    
+                        <input type="hidden" id="HdnExisteArquivo" name="HdnExisteArquivo" />	                    
+                    </td>
+                </tr>	
+                <input type="hidden" name="hdnpgm1" value="pgm1">  
+
                 <tr>
                     <td>
                         <label>
@@ -54,29 +78,9 @@
 
                         </div>                        
                     </td>
-                    <td>
-                        <label id="arquivoEscolhido" >  
-                            nenhum                          
-                        </label>
-                    </td>
 
                 </tr>    
-                <tr>
-                    <td>
-                        Operação:
-                    </td>
-                    <td>				
-                        <input type="radio" value="I" onclick="carregaOpt('I')" name="Optoperacao"> Inclusão\Alteração 
-                        </input>
-                        <input type="radio" value="C" onclick="carregaOpt('C')" name="Optoperacao"> Exclusão 
-                        </input>
-                        <input type="hidden" id="HdnOperacao" name="HdnOperacao" value=""/>	
-                        <input type="hidden" id="HdnNomeDoArquivo" name="HdnNomeDoArquivo" value="<%=NomeDoArquivo%>"/>	                                  
-                        <input type="hidden" id="HdnNumSeqPreco" name="HdnNumSeqPreco" value="<%=NUM_SEQ_TAB_PRE_ARQUIVO_PRECO%>"/>	                    
-                        <input type="hidden" id="HdnExisteArquivo" name="HdnExisteArquivo" />	                    
-                    </td>
-                </tr>	
-                <input type="hidden" name="hdnpgm1" value="pgm1">  
+
             </table>	
         </div>   
                 
