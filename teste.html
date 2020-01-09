@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>Importar tabela de preços</title>
+
+    <!-- Incluindo o CSS do Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+
+    <!-- Incluindo o estilo da estácio com as minhas alterações -->
+    <!-- alterar o caminho C:\App\SEC-4131689\sia\WebSIA\css -->
+    <link href="bootstrap/css/style.css" rel="stylesheet" media="screen" />
+
+    <!-- Incluindo o jQuery que é requisito do JavaScript do Bootstrap localmente-->
+    <script src="bootstrap/js/jquery-3.4.1.js"></script>
+
+    <!-- Incluindo o JavaScript do Bootstrap -->
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Carregar meus scripts -->
+    <script type="text/javascript" src="myScript.js">
+    </script>
+
+
+
+</head>
+<body>
+    <form class="well">
+            
+        <div class="topo" style="font-family:Georgia,Times New Roman,Times,serif">
+            <br />
+            <h3>Carregar tabela de preços</h3>
+            <br />
+            
+            <table class="topo">       
+                <tr>
+                    <td>
+                        <label>
+                            Selecione:
+                        </label>
+                    </td>
+                    <td>
+                        <div class="input-append">
+
+                            <i class="add-on">
+                                <label for="file-input" class="input-label icon-search">
+                                    <input type="file" id="file-input" onchange="Open()"/>                                    
+                                </label>
+
+                            </i>
+
+                        </div>                        
+                    </td>
+                    <td>
+                        <label id="arquivoEscolhido" >  
+                            nenhum                          
+                        </label>
+                    </td>
+
+                </tr>    
+                <tr>
+                    <td>
+                        Operação:
+                    </td>
+                    <td>				
+                        <input type="radio" value="I" onclick="carregaOpt('I')" name="Optoperacao"> Inclusão\Alteração 
+                        </input>
+                        <input type="radio" value="C" onclick="carregaOpt('C')" name="Optoperacao"> Exclusão 
+                        </input>
+                        <input type="hidden" id="HdnOperacao" name="HdnOperacao" value=""/>	
+                        <input type="hidden" id="HdnNomeDoArquivo" name="HdnNomeDoArquivo" value="<%=NomeDoArquivo%>"/>	                                  
+                        <input type="hidden" id="HdnNumSeqPreco" name="HdnNumSeqPreco" value="<%=NUM_SEQ_TAB_PRE_ARQUIVO_PRECO%>"/>	                    
+                        <input type="hidden" id="HdnExisteArquivo" name="HdnExisteArquivo" />	                    
+                    </td>
+                </tr>	
+                <input type="hidden" name="hdnpgm1" value="pgm1">  
+            </table>	
+        </div>   
+                
+    </form>
+</body>
+</html>
