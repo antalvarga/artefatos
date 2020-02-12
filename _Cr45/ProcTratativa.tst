@@ -1,7 +1,3 @@
-create or replace procedure sia.ProcTratativa(
-                                                pNumeroAcordo in PLS_INTEGER
-                                              )
-is
 -- Created on 04/02/2020 by ALUGA.COM 
 --declare 
   -- Local variables here
@@ -20,8 +16,86 @@ is
   /*
       Consulta atualizada pelo 
       e-mail Marcia Nepomuceno do Amaral <marcia.amaral.ter@estacio.br>
-      em sexta-feira, 7 de fevereiro de 2020 16:58
+      em seg 03/02/2020 11:41
       Para Antal Varga  
+      
+      Evidencias de que os testes passaram ok
+            
+      alter table sia.credito_mensalidade add NUM_SEQ_CRED_ORIGEM number
+578250
+2.2 = 167221137
+2.2 = 167221138
+2.2 = 167221139
+2.2 = 167221140 *
+2.2 = 167221140 *
+1088761
+2.2 = 194735797
+2.1 = 194735798
+1089256
+2.1 = 193268384
+2.1 = 193268385
+2.1 = 193268386
+1089257
+2.1 = 193272864
+2.1 = 193272865
+2.1 = 193272866
+1090602
+2.2 = 194628188
+2.2 = 194628189
+2.2 = 194628190
+2.2 = 194628191
+2.2 = 194628192 *
+2.2 = 194628192 *
+1090603
+2.2 = 194174680
+2.2 = 194174681
+2.2 = 194174682
+2.2 = 194174683
+2.2 = 194174684 *
+2.2 = 194174684 *
+1091976
+2.2 = 193914439 
+2.2 = 193914440
+2.2 = 193914441
+2.2 = 193914442
+2.2 = 193914443
+2.2 = 193914444
+2.2 = 193914445
+2.2 = 193914446
+2.2 = 193914447
+2.2 = 193914448
+2.2 = 193914449
+2.1 = 193914455
+2.1 = 193914456
+2.1 = 193914457
+2.1 = 193914458
+2.1 = 193914459
+2.1 = 193914460
+2.1 = 193914461
+2.1 = 193914462
+2.1 = 193914463
+2.1 = 193914464
+2.1 = 193914465
+2.1 = 193914466 *
+2.1 = 193914466 *
+1092898
+2.2 = 194196597
+2.2 = 194196598
+2.1 = 194196601
+1094704
+2.1 = 193269882
+2.1 = 193269883
+1094705
+2.1 = 193317777
+2.1 = 193317778
+1096166
+1096172
+2.2 = 194174257
+1096839
+1099218
+1142688
+
+      
       
   */
   -- 0- Para cada acordo listado :
@@ -33,18 +107,14 @@ is
            (select car.val_a_pagar  
            from sia.carne car , 
                 sia.acordo_especial_titulos aet 
-                -- ind_relacao = 0 carne que originou 
-           where aet.ind_relacao = 0
-           and   aet.num_seq_acordo_especial = ae.num_seq_acordo_especial 
+           where aet.num_seq_acordo_especial = ae.num_seq_acordo_especial 
            and   aet.num_seq_carne = car.num_seq_carne 
            ) valor_divida_antiga 
            ,
           (select sum( dm.val_a_receber ) 
            from sia.acordo_especial_titulos aet, 
                 sia.debito_mensalidade dm 
-           -- debitos a serem cobrados do aluno ind_relacao = 2
-           where aet.ind_relacao = 2
-           and   aet.num_seq_debito_mensalidade = dm.num_seq_debito_mensalidade 
+           where aet.num_seq_debito_mensalidade = dm.num_seq_debito_mensalidade 
            and   aet.num_seq_acordo_especial = ae.num_seq_acordo_especial
            and   dm.ind_situacao_debito <> '3' 
            )  valor_divida_nova
@@ -76,7 +146,9 @@ is
            from sia.credito_mensalidade cm 
            where cm.num_seq_candidato  = ae.num_seq_candidato
            and   cm.txt_credito_mensalidade = 'DEVOLUÇÃO POR PAGAMENTO DE PARCELA CANCELADA DO DIS COBRADA DE FORMA RETROATIVA'
-           and   cm.cod_motivo_credito = '19'
+           --and   cm.cod_motivo_credito = '19'
+           and   cm.cod_motivo_credito in( '19', '113' )
+		   
            and   cm.ind_situacao_credito in ('1','2') 
            ) valor_tot_cred_candidato 
            ,            
@@ -84,89 +156,18 @@ is
            from sia.credito_mensalidade cm 
            where cm.num_seq_aluno_curso = ae.num_seq_aluno_curso 
            and   cm.txt_credito_mensalidade = 'DEVOLUÇÃO POR PAGAMENTO DE PARCELA CANCELADA DO DIS COBRADA DE FORMA RETROATIVA'
-           and   cm.cod_motivo_credito = '19'
+           --and   cm.cod_motivo_credito = '19'
+           and   cm.cod_motivo_credito in( '19', '113' )
            and   cm.ind_situacao_credito in ('1','2') 
            ) valor_tot_cred_aluno
-           
-           -- AV - 20200210 : Atualizado conforme e-mail 
-           -- Marcia Nepomuceno do Amaral <marcia.amaral.ter@estacio.br>
-           -- Em sex 07/02/2020 16:58
-           /*
-              3.1 INCLUSÃO DE NOVA COLUNA, COM O TOTAL DE CREDITOS MENSALIDADE MANUAIS DO ALUNO 
-              COM IND_SITUACAO_CREDITO IN (1,2) AND COD_MOTIVO_CREDITO = 113 . 
-              NÃO UTILIZAR O CAMPO TXT_CREDITO_MENSALIDADE NESSA CONSULTA.
-           */
-           ,  
-           (select sum(cm.val_restituicao) 
-           from sia.credito_mensalidade cm 
-           where cm.num_seq_aluno_curso = ae.num_seq_aluno_curso 
-           and   cm.cod_motivo_credito in( '113' )
-           and   cm.ind_situacao_credito in ('1','2') 
-           ) tot_cred_manual_113_aluno
-           /*
-           3.2 INCLUSÃO DE NOVA COLUNA, COM O TOTAL DE CREDITO MENSALIDADE MANUAIS DO CANDIDATO 
-           COM IND_SITUACAO_CREDITO IN (1,2) AND COD_MOTIVO_CREDITO = 113 . 
-           NÃO UTILIZAR O CAMPO TXT_CREDITO_MENSALIDADE NESSA CONSULTA.
-           */
-           ,  
-           ( select sum(cm.val_restituicao)  
-             from sia.credito_mensalidade cm 
-             where cm.num_seq_candidato = ae.num_seq_candidato
-             and   cm.cod_motivo_credito in( '113' )
-             and   cm.ind_situacao_credito in ('1','2') 
-            ) tot_cred_manual_113_candidato
-           /*
-           3.3 ¿ NOVA COLUNA TESTANDO A EXISTENCIA DO  TIPO DE BOLSA'22624' NO CARNE DA DÍVIDA ANTIGA. 
-           `ISENÇÃO DE MATRÍCULA - PARCEIRO ONLINE¿
-           */
-           ,
-            (   
-              select decode( count(1), 0, 'NAO', 'SIM' )
-
-              from   sia.acordo_especial_titulos aet,
-                     sia.mensalidade men, 
-                     sia.composicao_mensalidade cm1, 
-                     sia.bolsista bol 
-                    
-              where  aet.ind_relacao = 0
-              and    aet.num_seq_acordo_especial = ae.num_seq_acordo_especial
-              and    men.num_seq_carne = aet.num_seq_carne
-              and    men.num_seq_mensalidade = cm1.num_seq_mensalidade      
-              and    cm1.num_seq_bolsista = bol.num_seq_bolsista 
-              and    cm1.cod_tipo_bolsa = '22624'
-              --and    rownum = 1               
-            ) EXISTE_BOLSA_22624 
-         /*
-         3.4 - INCLUSÃO DE NOVA COLUNA, COM O TOTAL DE CREDITOS MENSALIDADE MANUAIS 
-         DO ALUNO COM IND_SITUACAO_CREDITO IN (1,2) AND COD_MOTIVO_CREDITO = 70 . 
-         NÃO UTILIZAR O CAMPO TXT_CREDITO_MENSALIDADE NESSA CONSULTA.
-         `DEVOLUÇÃO POR DESISTÊNCIA DA MATRÍCULA COM RESERVA (80%)¿
-         Exemplo candidato 5457993
-         */
-         -- 			Exemplo candidato 5457993    
-         ,
-         ( select sum(cm.val_restituicao) 
-             from   sia.credito_mensalidade cm 
-             where  cm.num_seq_candidato = ae.num_seq_candidato
-             and    cm.cod_motivo_credito = 70
-             and    cm.ind_situacao_credito in ('1','2') 
-         ) tot_cred_manual_70_candidato
-         ,
-         ( select sum(cm.val_restituicao) 
-             from   sia.credito_mensalidade cm 
-             where  cm.num_seq_aluno_curso = ae.num_seq_aluno_curso
-             and    cm.cod_motivo_credito = 70
-             and    cm.ind_situacao_credito in ('1','2') 
-         ) tot_cred_manual_70_aluno
-
-                    
+                     
     from sia.acordo_especial ae, 
          sia.tipo_acordo_especial tp
          
     where ae.ind_situacao = '8' 
     and   ae.cod_tipo_acordo_especial = '4'     
---    and   ae.num_seq_acordo_especial = 578250 -- 1088761 -- MyAcordo ----------------exemplo 
-    
+    and   ae.num_seq_acordo_especial = 578250 -- 1088761 -- MyAcordo ----------------exemplo 
+/*    
     and   ae.num_seq_acordo_especial in  
     (    
         1090602
@@ -185,22 +186,20 @@ is
         , 1092898    
         , 1088761
     )
-
+*/    
         
     and   ae.cod_tipo_acordo_especial = tp.cod_tipo_acordo_especial 
     and   ( (select car.val_a_pagar  
                 from sia.carne car , 
                      sia.acordo_especial_titulos aet 
-                where aet.ind_relacao = 0
-                and   aet.num_seq_acordo_especial = ae.num_seq_acordo_especial 
+                where aet.num_seq_acordo_especial = ae.num_seq_acordo_especial 
                 and   aet.num_seq_carne = car.num_seq_carne 
                )  
                -
                (select sum( dm.val_a_receber ) 
                 from sia.acordo_especial_titulos aet, 
                      sia.debito_mensalidade dm 
-                where aet.ind_relacao = 2
-                and   aet.num_seq_debito_mensalidade = dm.num_seq_debito_mensalidade 
+                where aet.num_seq_debito_mensalidade = dm.num_seq_debito_mensalidade 
                 and   aet.num_seq_acordo_especial = ae.num_seq_acordo_especial
                 and   dm.ind_situacao_debito <> '3'
                )  
@@ -228,11 +227,10 @@ is
            ,
            --
            (select car2.val_a_pagar 
-           from    sia.carne car2 , 
-                   sia.acordo_especial_titulos aet2
-            where  aet.ind_relacao = 0
-            and    aet2.num_seq_acordo_especial = aet.num_seq_acordo_especial 
-            and    aet2.num_seq_carne = car2.num_seq_carne 
+           from sia.carne car2 , 
+                sia.acordo_especial_titulos aet2
+            where aet2.num_seq_acordo_especial = aet.num_seq_acordo_especial 
+            and   aet2.num_seq_carne = car2.num_seq_carne 
             ) valor_carne    
             ,
             dm.ind_situacao_debito  
@@ -265,7 +263,7 @@ is
            where cm.num_seq_aluno_curso = ae.num_seq_aluno_curso 
            and   cm.val_restituicao = dm.val_a_receber
            and   cm.txt_credito_mensalidade = 'DEVOLUÇÃO POR PAGAMENTO DE PARCELA CANCELADA DO DIS COBRADA DE FORMA RETROATIVA'
-           and   cm.cod_motivo_credito in( '19', '113')
+           and   cm.cod_motivo_credito = '19'
            and   cm.ind_situacao_credito in ('1','2') 
            and   cm.dt_mes_ano_referencia = dm.dt_mes_ano_referencia 
            ) valor_tot_cred_nesse_valor -----??????????????????????????????????????????
@@ -275,29 +273,16 @@ is
           sia.acordo_especial ae 
     where dm.num_seq_debito_mensalidade = aet.num_seq_debito_mensalidade 
     and   ae.num_seq_acordo_especial = aet.num_seq_acordo_especial 
-    and   dm.ind_situacao_debito <> '3'     
-    --and   aet.num_seq_acordo_especial = pAcordo
-    and   aet.num_seq_acordo_especial in
-    (    
-        1090602
-        , 1090603
-        , 1094704
-        , 1094705
-        , 1089257
-        , 1089256
-        , 1142688
-        , 1091976
-        , 1096166
-        , 1096172
-        , 1096839
-        , 578250
-        , 1099218
-        , 1092898    
-        , 1088761
-    )    
+    and   dm.ind_situacao_debito <> '3' 
+    
+    and   aet.num_seq_acordo_especial = pAcordo
+    
     -- TODO: Remover esta linha
-    -- and   aet.Num_Seq_Debito_Mensalidade = 167221140        
-    order by aet.num_seq_acordo_especial, dm.num_seq_debito_mensalidade , dm.dt_mes_ano_referencia; 
+    -- and   aet.Num_Seq_Debito_Mensalidade = 167221140
+    
+    
+    
+    order by dm.num_seq_debito_mensalidade , dm.dt_mes_ano_referencia; 
 
   --
   cDM cursorDebitoMensalidade%Rowtype;
@@ -363,156 +348,155 @@ is
                               
       MyActionSql := MyActionSql || ' ) values ( ';
        
-    --  num_seq_periodo_academico  
+	  --  num_seq_periodo_academico	
       --MyActionSql := MyActionSql ||     nvl( cDM.Seqperiodo, 'null' ) ; 
-    if cDM.Seqperiodo is null then
-      MyActionSql := MyActionSql ||     'null'; 
-    else
-      MyActionSql := MyActionSql ||     cDM.Seqperiodo; 
-    end if;     
-    
-    --  cod_moeda
+	  if cDM.Seqperiodo is null then
+	    MyActionSql := MyActionSql ||     'null'; 
+	  else
+	    MyActionSql := MyActionSql ||     cDM.Seqperiodo; 
+	  end if; 	  
+	  
+	  --  cod_moeda
       MyActionSql := MyActionSql || ' , 9 ';     
-      
+	  	
       --  cod_motivo_credito
-    MyActionSql := MyActionSql || ' , 19';                            
+	  MyActionSql := MyActionSql || ' , 19';                            
       
-    --  txt_credito_mensalidade
-    MyActionSql := MyActionSql || ' , ' || chr(39) || 'DEVOLUÇÃO POR PAGAMENTO DE PARCELA CANCELADA DO DIS COBRADA DE FORMA RETROATIVA' || chr(39);
+	  --  txt_credito_mensalidade
+	  MyActionSql := MyActionSql || ' , ' || chr(39) || 'DEVOLUÇÃO POR PAGAMENTO DE PARCELA CANCELADA DO DIS COBRADA DE FORMA RETROATIVA' || chr(39);
       
-    --  dt_vencimento
-    MyActionSql := MyActionSql || ' , ' || chr(39) || cDM.dt_vencimento || chr(39) ;            
+	  --  dt_vencimento
+	  MyActionSql := MyActionSql || ' , ' || chr(39) || cDM.dt_vencimento || chr(39) ;            
       
-    --  dt_restituicao
-    MyActionSql := MyActionSql || ' , null ';                            
+	  --  dt_restituicao
+	  MyActionSql := MyActionSql || ' , null ';                            
       
-    --  val_restituido
-    MyActionSql := MyActionSql || ' , 0  ';                              
+	  --  val_restituido
+	  MyActionSql := MyActionSql || ' , 0  ';                              
       
-    --  val_credito_extendido
-    MyActionSql := MyActionSql || ' , null ';                           
+	  --  val_credito_extendido
+	  MyActionSql := MyActionSql || ' , null ';                           
       
-    --  ind_situacao_credito
-    MyActionSql := MyActionSql || ' , 1' ;
+	  --  ind_situacao_credito
+	  MyActionSql := MyActionSql || ' , 1' ;
       
-    --  ind_forma_restituicao
-    MyActionSql := MyActionSql || ' , null ';                                        
+	  --  ind_forma_restituicao
+	  MyActionSql := MyActionSql || ' , null ';                                        
       
-    --  dt_mes_ano_referencia
-    MyActionSql := MyActionSql || ' , ' || chr(39) || cDM.dt_mes_ano_referencia || chr(39);      
+	  --  dt_mes_ano_referencia
+	  MyActionSql := MyActionSql || ' , ' || chr(39) || cDM.dt_mes_ano_referencia || chr(39);      
       
-    --  ind_tipo_credito
-    MyActionSql := MyActionSql || ' , 1'  ;
+	  --  ind_tipo_credito
+	  MyActionSql := MyActionSql || ' , 1'  ;
       
-    --  num_seq_aluno_curso
-    MyActionSql := MyActionSql || ' , ' || cDM.num_seq_aluno_curso;
-    
-    --  val_restituicao/ val receber
-      MyActionSql := MyActionSql ||     chr(13) || ' /* cDM.val_a_receber */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , ' || nvl(cDM.val_a_receber,0) ;      
-    
+	  --  num_seq_aluno_curso
+	  MyActionSql := MyActionSql || ' , ' || cDM.num_seq_aluno_curso;
+	  
+	  --  val_restituicao/ val receber
+      MyActionSql := MyActionSql ||     chr(13) || ' /* cDM.val_a_receber */ ' || chr(13);            	  
+	  MyActionSql := MyActionSql || ' , ' || nvl(cDM.val_a_receber,0) ;      
+	  
       --  cod_curso ***
-      MyActionSql := MyActionSql ||     chr(13) || ' /* cod_curso */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , null ';            
+      MyActionSql := MyActionSql ||     chr(13) || ' /* cod_curso */ ' || chr(13);            	  
+	  MyActionSql := MyActionSql || ' , null ';            
       
-    --  num_seq_grupo
-      MyActionSql := MyActionSql ||     chr(13) || ' /* num_seq_grupo */ ' || chr(13);                
-    --MyActionSql := MyActionSql || ' , ' || nvl( cDM.num_seq_grupo, null) ;
+	  --  num_seq_grupo
+      MyActionSql := MyActionSql ||     chr(13) || ' /* num_seq_grupo */ ' || chr(13);            	  
+	  --MyActionSql := MyActionSql || ' , ' || nvl( cDM.num_seq_grupo, null) ;
 
-    if cDM.num_seq_grupo is null then
-      MyActionSql := MyActionSql ||   ', null'; 
-    else
-      MyActionSql := MyActionSql ||   ',' ||  cDM.num_seq_grupo; 
-    end if;     
+	  if cDM.num_seq_grupo is null then
+	    MyActionSql := MyActionSql ||   ', null'; 
+	  else
+	    MyActionSql := MyActionSql ||   ',' ||  cDM.num_seq_grupo; 
+	  end if; 	  
       
       --  num_seq_candidato
-    MyActionSql := MyActionSql ||     chr(13) || ' /* cDM.num_seq_candidato */ ' || chr(13);            
-    --MyActionSql := MyActionSql || ' , ' || nvl( cDM.num_seq_candidato, null) ;            
+	  MyActionSql := MyActionSql ||     chr(13) || ' /* cDM.num_seq_candidato */ ' || chr(13);            
+	  --MyActionSql := MyActionSql || ' , ' || nvl( cDM.num_seq_candidato, null) ;            
             
-    if cDM.num_seq_candidato is null then
-      MyActionSql := MyActionSql ||     ', null'; 
-    else
-      MyActionSql := MyActionSql ||   ',' ||  cDM.num_seq_candidato; 
-    end if;     
+	  if cDM.num_seq_candidato is null then
+	    MyActionSql := MyActionSql ||     ', null'; 
+	  else
+	    MyActionSql := MyActionSql ||   ',' ||  cDM.num_seq_candidato; 
+	  end if; 	  
+			
+	  --  num_seq_aluno_turma_extensao
+      MyActionSql := MyActionSql ||     chr(13) || ' /* num_seq_aluno_turma_extensao */ ' || chr(13);            	  
+	  MyActionSql := MyActionSql || ' , null ';
       
-    --  num_seq_aluno_turma_extensao
-      MyActionSql := MyActionSql ||     chr(13) || ' /* num_seq_aluno_turma_extensao */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , null ';
+	  --  num_cheque ***
+      MyActionSql := MyActionSql ||     chr(13) || ' /* num_cheque */ ' || chr(13);            	  
+	  MyActionSql := MyActionSql || ' , null ';                            
       
-    --  num_cheque ***
-      MyActionSql := MyActionSql ||     chr(13) || ' /* num_cheque */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , null ';                            
+	  --  num_seq_credito_mensalidade
+      MyActionSql := MyActionSql ||     chr(13) || ' /* num_seq_credito_mensalidade */ ' || chr(13);            	  
+	  MyActionSql := MyActionSql || ' , ' || MySequencial;               
       
-    --  num_seq_credito_mensalidade
-      MyActionSql := MyActionSql ||     chr(13) || ' /* num_seq_credito_mensalidade */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , ' || MySequencial;               
+	  --  cod_usuario_log
+	  MyActionSql := MyActionSql || ' , 1016283 ';                       
       
-    --  cod_usuario_log
-    MyActionSql := MyActionSql || ' , 1016283 ';                       
+	  --  dt_atualiza_log
+	  MyActionSql := MyActionSql || ' , ' || chr(39) || sysdate || chr(39);                         
       
-    --  dt_atualiza_log
-    MyActionSql := MyActionSql || ' , ' || chr(39) || sysdate || chr(39);                         
+	  --  txt_ip_log ***
+	  MyActionSql := MyActionSql || ' , ' || chr(39) || MyIpLog || chr(39);                        
       
-    --  txt_ip_log ***
-    MyActionSql := MyActionSql || ' , ' || chr(39) || MyIpLog || chr(39);                        
+	  --  num_seq_inscricao
+	  MyActionSql := MyActionSql || ' , null  ';                                                          
       
-    --  num_seq_inscricao
-    MyActionSql := MyActionSql || ' , null  ';                                                          
+	  --  cod_usuario_acerto
+	  MyActionSql := MyActionSql || ' , null  ';                           
       
-    --  cod_usuario_acerto
-    MyActionSql := MyActionSql || ' , null  ';                           
+	  --  dt_usuario_acerto
+	  MyActionSql := MyActionSql || ' , null  ';                          
       
-    --  dt_usuario_acerto
-    MyActionSql := MyActionSql || ' , null  ';                          
+	  --  num_seq_ocorrencia
+	  MyActionSql := MyActionSql || ' , null  ';                           
       
-    --  num_seq_ocorrencia
-    MyActionSql := MyActionSql || ' , null  ';                           
+	  --  dt_cancelamento
+	  MyActionSql := MyActionSql || ' , null  ';                           
       
-    --  dt_cancelamento
-    MyActionSql := MyActionSql || ' , null  ';                           
+	  --  cod_usuario_cancel
+	  MyActionSql := MyActionSql || ' , null  ';                           
       
-    --  cod_usuario_cancel
-    MyActionSql := MyActionSql || ' , null  ';                           
+	  --  cod_rubrica_r3
+	  MyActionSql := MyActionSql || ' , 179 ';                           
       
-    --  cod_rubrica_r3
-    MyActionSql := MyActionSql || ' , 179 ';                           
+	  --  cod_usuario_inclusao
+	  MyActionSql := MyActionSql || ' , ' || chr(39) || '93778848704' || chr(39) ;                   
       
-    --  cod_usuario_inclusao
-    MyActionSql := MyActionSql || ' , ' || chr(39) || '93778848704' || chr(39) ;                   
+	  --  dt_inclusao
+	  MyActionSql := MyActionSql || ' , ' || chr(39) || sysdate || chr(39);                         
       
-    --  dt_inclusao
-    MyActionSql := MyActionSql || ' , ' || chr(39) || sysdate || chr(39);                         
+	  --  cod_concessionaria
+	  MyActionSql := MyActionSql || ' , null   ';                          
       
-    --  cod_concessionaria
-    MyActionSql := MyActionSql || ' , null   ';                          
+	  --  cod_concessionaria_r3
+	  MyActionSql := MyActionSql || ' , null   ';                         
       
-    --  cod_concessionaria_r3
-    MyActionSql := MyActionSql || ' , null   ';                         
+	  --  id_instituicao_mig
+	  MyActionSql := MyActionSql || ' , null   ';                         
       
-    --  id_instituicao_mig
-    MyActionSql := MyActionSql || ' , null   ';                         
+	  --  cod_disciplina
+	  MyActionSql := MyActionSql || ' , null   ';                          
       
-    --  cod_disciplina
-    MyActionSql := MyActionSql || ' , null   ';                          
+	  --  ind_mov_disciplina
+	  MyActionSql := MyActionSql || ' , null   ';                          
       
-    --  ind_mov_disciplina
-    MyActionSql := MyActionSql || ' , null   ';                          
-      
-    -- num_seq_debito_mensalidade 
-    MyActionSql := MyActionSql || ' , ' || cDM.num_seq_debito_mensalidade ;
+	  -- num_seq_debito_mensalidade 
+	  MyActionSql := MyActionSql || ' , ' || cDM.num_seq_debito_mensalidade ;
       MyActionSql := MyActionSql || '  ); ' ;
             
-      dbms_output.put_line( MyActionSql );
-
-      --execute immediate MyActionSql;
+      execute immediate MyActionSql;
                           
       commit;    
       
+      dbms_output.put_line( MyActionSql );
 
-    /* RETIRAR */
+	  /* RETIRAR */
       --raise_application_error( -20001, 'Erro na ProcTratativaPRB45' );
 
-    
+	  
     return 1;
   
   exception
@@ -549,13 +533,13 @@ is
     MyPoint := 6;
     dbms_output.put_line( '2.1 = ' || cDM.Num_Seq_Debito_Mensalidade);
 
-/*
     update SIA.debito_mensalidade deme
     set    deme.ind_situacao_debito = 3    
     where  deme.ind_situacao_debito = 1
     and    deme.num_seq_debito_mensalidade = cDM.num_seq_debito_mensalidade ;
-*/      
+      
     --commit;
+    rollback;
     return 1;
   
   exception
@@ -596,17 +580,18 @@ is
     into   MyResult
     from   all_tab_columns
     where  1=1
-    and    column_name = 'NUM_SEQ_CRED_ORIGEM'
+    and    column_name = 'NUM_SEQ_DEBITO_ORIGEM'
     and    upper( table_name ) = 'CREDITO_MENSALIDADE'
     and    owner = 'SIA';
       
     if MyResult <> 1 then
       
-      MyActionSql := 'alter table sia.credito_mensalidade add NUM_SEQ_CRED_ORIGEM number;';
+      MyActionSql := 'alter table sia.credito_mensalidade add NUM_SEQ_DEBITO_ORIGEM number;';
       
-      dbms_output.put_line( MyActionSql );
+      -- Erro -> operação de adição/eliminação não suportada em tabelas compactadas
+	  -- Lazaro sugeriu que criassemos essa consulta no aplicar.sql da branch
+      --dbms_output.put_line( MyActionSql );
       --execute immediate MyActionSql; 
-      -- Erro ao executar devido à permissao
             
     end if;
 
@@ -720,4 +705,3 @@ exception
                             , MyParam
                             , sqlerrm);
 end;
-/
