@@ -2,8 +2,8 @@ create or replace procedure sia.ProcTratativa(
                                                 pNumeroAcordo in PLS_INTEGER
                                               )
 is
--- Created on 04/02/2020 by ALUGA.COM 
---declare 
+  -- Created on 04/02/2020 by ALUGA.COM 
+  --declare 
   -- Local variables here
 
   MySum number;
@@ -86,8 +86,7 @@ is
            and   cm.txt_credito_mensalidade = 'DEVOLUÇÃO POR PAGAMENTO DE PARCELA CANCELADA DO DIS COBRADA DE FORMA RETROATIVA'
            and   cm.cod_motivo_credito = '19'
            and   cm.ind_situacao_credito in ('1','2') 
-           ) valor_tot_cred_aluno
-           
+           ) valor_tot_cred_aluno           
            -- AV - 20200210 : Atualizado conforme e-mail 
            -- Marcia Nepomuceno do Amaral <marcia.amaral.ter@estacio.br>
            -- Em sex 07/02/2020 16:58
@@ -276,7 +275,8 @@ is
     where dm.num_seq_debito_mensalidade = aet.num_seq_debito_mensalidade 
     and   ae.num_seq_acordo_especial = aet.num_seq_acordo_especial 
     and   dm.ind_situacao_debito <> '3'     
-    --and   aet.num_seq_acordo_especial = pAcordo
+    and   aet.num_seq_acordo_especial = pAcordo
+    /*
     and   aet.num_seq_acordo_especial in
     (    
         1090602
@@ -294,7 +294,7 @@ is
         , 1099218
         , 1092898    
         , 1088761
-    )    
+    ) */   
     -- TODO: Remover esta linha
     -- and   aet.Num_Seq_Debito_Mensalidade = 167221140        
     order by aet.num_seq_acordo_especial, dm.num_seq_debito_mensalidade , dm.dt_mes_ano_referencia; 
@@ -320,193 +320,88 @@ is
     
     select sia.s_credito_mensalidade.nextval into MySequencial
     from   dual;
-     
-      MyActionSql :=                ' insert into sia.credito_mensalidade ';
-      MyActionSql := MyActionSql || ' ( num_seq_periodo_academico ';
-      MyActionSql := MyActionSql || ' , cod_moeda ';
-      MyActionSql := MyActionSql || ' , cod_motivo_credito ';
-      MyActionSql := MyActionSql || ' , txt_credito_mensalidade ';
-      MyActionSql := MyActionSql || ' , dt_vencimento ';
-      MyActionSql := MyActionSql || ' , dt_restituicao ';
-      MyActionSql := MyActionSql || ' , val_restituido ';
-      MyActionSql := MyActionSql || ' , val_credito_extendido ';
-      MyActionSql := MyActionSql || ' , ind_situacao_credito ';
-      MyActionSql := MyActionSql || ' , ind_forma_restituicao ';
-      MyActionSql := MyActionSql || ' , dt_mes_ano_referencia ';
-      MyActionSql := MyActionSql || ' , ind_tipo_credito ';
-      MyActionSql := MyActionSql || ' , num_seq_aluno_curso ';
-      MyActionSql := MyActionSql || ' , val_restituicao ';
-      MyActionSql := MyActionSql || ' , cod_curso ';
-      MyActionSql := MyActionSql || ' , num_seq_grupo ';
-      MyActionSql := MyActionSql || ' , num_seq_candidato ';
-      MyActionSql := MyActionSql || ' , num_seq_aluno_turma_extensao ';
-      MyActionSql := MyActionSql || ' , num_cheque ';
-      MyActionSql := MyActionSql || ' , num_seq_credito_mensalidade ';
-      MyActionSql := MyActionSql || ' , cod_usuario_log ';
-      MyActionSql := MyActionSql || ' , dt_atualiza_log ';
-      MyActionSql := MyActionSql || ' , txt_ip_log ';
-      MyActionSql := MyActionSql || ' , num_seq_inscricao ';
-      MyActionSql := MyActionSql || ' , cod_usuario_acerto ';
-      MyActionSql := MyActionSql || ' , dt_usuario_acerto ';
-      MyActionSql := MyActionSql || ' , num_seq_ocorrencia ';
-      MyActionSql := MyActionSql || ' , dt_cancelamento ';
-      MyActionSql := MyActionSql || ' , cod_usuario_cancel ';
-      MyActionSql := MyActionSql || ' , cod_rubrica_r3 ';
-      MyActionSql := MyActionSql || ' , cod_usuario_inclusao ';
-      MyActionSql := MyActionSql || ' , dt_inclusao ';
-      MyActionSql := MyActionSql || ' , cod_concessionaria ';
-      MyActionSql := MyActionSql || ' , cod_concessionaria_r3 ';
-      MyActionSql := MyActionSql || ' , id_instituicao_mig ';
-      MyActionSql := MyActionSql || ' , cod_disciplina ';
-      MyActionSql := MyActionSql || ' , ind_mov_disciplina ';
-      MyActionSql := MyActionSql || ' , num_seq_debito_origem ';
-                              
-      MyActionSql := MyActionSql || ' ) values ( ';
-       
-    --  num_seq_periodo_academico  
-      --MyActionSql := MyActionSql ||     nvl( cDM.Seqperiodo, 'null' ) ; 
-    if cDM.Seqperiodo is null then
-      MyActionSql := MyActionSql ||     'null'; 
-    else
-      MyActionSql := MyActionSql ||     cDM.Seqperiodo; 
-    end if;     
     
-    --  cod_moeda
-      MyActionSql := MyActionSql || ' , 9 ';     
-      
-      --  cod_motivo_credito
-    MyActionSql := MyActionSql || ' , 19';                            
-      
-    --  txt_credito_mensalidade
-    MyActionSql := MyActionSql || ' , ' || chr(39) || 'DEVOLUÇÃO POR PAGAMENTO DE PARCELA CANCELADA DO DIS COBRADA DE FORMA RETROATIVA' || chr(39);
-      
-    --  dt_vencimento
-    MyActionSql := MyActionSql || ' , ' || chr(39) || cDM.dt_vencimento || chr(39) ;            
-      
-    --  dt_restituicao
-    MyActionSql := MyActionSql || ' , null ';                            
-      
-    --  val_restituido
-    MyActionSql := MyActionSql || ' , 0  ';                              
-      
-    --  val_credito_extendido
-    MyActionSql := MyActionSql || ' , null ';                           
-      
-    --  ind_situacao_credito
-    MyActionSql := MyActionSql || ' , 1' ;
-      
-    --  ind_forma_restituicao
-    MyActionSql := MyActionSql || ' , null ';                                        
-      
-    --  dt_mes_ano_referencia
-    MyActionSql := MyActionSql || ' , ' || chr(39) || cDM.dt_mes_ano_referencia || chr(39);      
-      
-    --  ind_tipo_credito
-    MyActionSql := MyActionSql || ' , 1'  ;
-      
-    --  num_seq_aluno_curso
-    MyActionSql := MyActionSql || ' , ' || cDM.num_seq_aluno_curso;
-    
-    --  val_restituicao/ val receber
-      MyActionSql := MyActionSql ||     chr(13) || ' /* cDM.val_a_receber */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , ' || nvl(cDM.val_a_receber,0) ;      
-    
-      --  cod_curso ***
-      MyActionSql := MyActionSql ||     chr(13) || ' /* cod_curso */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , null ';            
-      
-    --  num_seq_grupo
-      MyActionSql := MyActionSql ||     chr(13) || ' /* num_seq_grupo */ ' || chr(13);                
-    --MyActionSql := MyActionSql || ' , ' || nvl( cDM.num_seq_grupo, null) ;
-
-    if cDM.num_seq_grupo is null then
-      MyActionSql := MyActionSql ||   ', null'; 
-    else
-      MyActionSql := MyActionSql ||   ',' ||  cDM.num_seq_grupo; 
-    end if;     
-      
-      --  num_seq_candidato
-    MyActionSql := MyActionSql ||     chr(13) || ' /* cDM.num_seq_candidato */ ' || chr(13);            
-    --MyActionSql := MyActionSql || ' , ' || nvl( cDM.num_seq_candidato, null) ;            
-            
-    if cDM.num_seq_candidato is null then
-      MyActionSql := MyActionSql ||     ', null'; 
-    else
-      MyActionSql := MyActionSql ||   ',' ||  cDM.num_seq_candidato; 
-    end if;     
-      
-    --  num_seq_aluno_turma_extensao
-      MyActionSql := MyActionSql ||     chr(13) || ' /* num_seq_aluno_turma_extensao */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , null ';
-      
-    --  num_cheque ***
-      MyActionSql := MyActionSql ||     chr(13) || ' /* num_cheque */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , null ';                            
-      
-    --  num_seq_credito_mensalidade
-      MyActionSql := MyActionSql ||     chr(13) || ' /* num_seq_credito_mensalidade */ ' || chr(13);                
-    MyActionSql := MyActionSql || ' , ' || MySequencial;               
-      
-    --  cod_usuario_log
-    MyActionSql := MyActionSql || ' , 1016283 ';                       
-      
-    --  dt_atualiza_log
-    MyActionSql := MyActionSql || ' , ' || chr(39) || sysdate || chr(39);                         
-      
-    --  txt_ip_log ***
-    MyActionSql := MyActionSql || ' , ' || chr(39) || MyIpLog || chr(39);                        
-      
-    --  num_seq_inscricao
-    MyActionSql := MyActionSql || ' , null  ';                                                          
-      
-    --  cod_usuario_acerto
-    MyActionSql := MyActionSql || ' , null  ';                           
-      
-    --  dt_usuario_acerto
-    MyActionSql := MyActionSql || ' , null  ';                          
-      
-    --  num_seq_ocorrencia
-    MyActionSql := MyActionSql || ' , null  ';                           
-      
-    --  dt_cancelamento
-    MyActionSql := MyActionSql || ' , null  ';                           
-      
-    --  cod_usuario_cancel
-    MyActionSql := MyActionSql || ' , null  ';                           
-      
-    --  cod_rubrica_r3
-    MyActionSql := MyActionSql || ' , 179 ';                           
-      
-    --  cod_usuario_inclusao
-    MyActionSql := MyActionSql || ' , ' || chr(39) || '93778848704' || chr(39) ;                   
-      
-    --  dt_inclusao
-    MyActionSql := MyActionSql || ' , ' || chr(39) || sysdate || chr(39);                         
-      
-    --  cod_concessionaria
-    MyActionSql := MyActionSql || ' , null   ';                          
-      
-    --  cod_concessionaria_r3
-    MyActionSql := MyActionSql || ' , null   ';                         
-      
-    --  id_instituicao_mig
-    MyActionSql := MyActionSql || ' , null   ';                         
-      
-    --  cod_disciplina
-    MyActionSql := MyActionSql || ' , null   ';                          
-      
-    --  ind_mov_disciplina
-    MyActionSql := MyActionSql || ' , null   ';                          
-      
-    -- num_seq_debito_mensalidade 
-    MyActionSql := MyActionSql || ' , ' || cDM.num_seq_debito_mensalidade ;
-      MyActionSql := MyActionSql || '  ); ' ;
-            
-      dbms_output.put_line( MyActionSql );
-
-      --execute immediate MyActionSql;
-                          
-      commit;    
+    insert into sia.credito_mensalidade
+    ( num_seq_periodo_academico
+      , cod_moeda
+      , cod_motivo_credito
+      , txt_credito_mensalidade
+      , dt_vencimento
+      , dt_restituicao
+      , val_restituido
+      , val_credito_extendido
+      , ind_situacao_credito
+      , ind_forma_restituicao
+      , dt_mes_ano_referencia
+      , ind_tipo_credito
+      , num_seq_aluno_curso
+      , val_restituicao
+      , cod_curso
+      , num_seq_grupo
+      , num_seq_candidato
+      , num_seq_aluno_turma_extensao
+      , num_cheque
+      , num_seq_credito_mensalidade
+      , cod_usuario_log
+      , dt_atualiza_log
+      , txt_ip_log
+      , num_seq_inscricao
+      , cod_usuario_acerto
+      , dt_usuario_acerto
+      , num_seq_ocorrencia
+      , dt_cancelamento
+      , cod_usuario_cancel
+      , cod_rubrica_r3
+      , cod_usuario_inclusao
+      , dt_inclusao
+      , cod_concessionaria
+      , cod_concessionaria_r3
+      , id_instituicao_mig
+      , cod_disciplina
+      , ind_mov_disciplina
+      , num_seq_debito_origem
+    )
+    values 
+    ( null               --  num_seq_periodo_academico
+      , '9'                       --  cod_moeda
+      , '19'                      --  cod_motivo_credito
+      , 'DEVOLUÇÃO POR PAGAMENTO DE PARCELA CANCELADA DO DIS COBRADA DE FORMA RETROATIVA' --  txt_credito_mensalidade
+      , cDM.dt_vencimento         --  dt_vencimento
+      , null                          --  dt_restituicao
+      , 0                            --  val_restituido
+      , null                            --  val_credito_extendido
+      , '1'                             --  ind_situacao_credito
+      , null                            --  ind_forma_restituicao
+      , cDM.dt_mes_ano_referencia       --  dt_mes_ano_referencia
+      , '1'                             --  ind_tipo_credito
+      , cDM.num_seq_aluno_curso         --  num_seq_aluno_curso
+      , cDM.val_a_receber               --  val_restituicao
+      , null                            --  cod_curso ***
+      , cDM.num_seq_grupo                --  num_seq_grupo
+      , cDM.num_seq_candidato            --  num_seq_candidato
+      , cDM.SeqTurmaExt --  num_seq_aluno_turma_extensao
+      , null                            --  num_cheque ***
+      , MySequencial                    --  num_seq_credito_mensalidade
+      , '1016283'                       --  cod_usuario_log
+      , sysdate                         --  dt_atualiza_log
+      , '10.8.2.147'                         --  txt_ip_log ***
+      , null                            --  num_seq_inscricao
+      , null                            --  cod_usuario_acerto
+      , null                            --  dt_usuario_acerto
+      , null                            --  num_seq_ocorrencia
+      , null                            --  dt_cancelamento
+      , null                            --  cod_usuario_cancel
+      , '179'                           --  cod_rubrica_r3
+      , '93778848704'                   --  cod_usuario_inclusao
+      , sysdate                         --  dt_inclusao
+      , null                            --  cod_concessionaria
+      , null                            --  cod_concessionaria_r3
+      , null                            --  id_instituicao_mig
+      , null                            --  cod_disciplina
+      , null                            --  ind_mov_disciplina
+      , cDM.num_seq_debito_mensalidade  -- num_seq_debito_mensalidadeorigem
+    );
+    commit;    
       
 
     /* RETIRAR */
